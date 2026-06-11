@@ -61,8 +61,21 @@
         <text class="video-section-title">未处理视频</text>
         <view class="video-list">
           <view wx:for="{{item.unprocessedVideos}}" wx:key="assetId" wx:for-item="video" class="video-row">
-            <text class="video-name">第 {{video.episodeNo}} 集 · {{video.originalFileName}}</text>
-            <text class="video-status video-status-{{video.statusClass}}">{{video.statusLabel}}</text>
+            <view class="video-main">
+              <text class="video-name">第 {{video.episodeNo}} 集 · {{video.originalFileName}}</text>
+            </view>
+            <view class="video-actions">
+              <text class="video-status video-status-{{video.statusClass}}">{{video.statusLabel}}</text>
+              <button
+                wx:if="{{video.canDelete}}"
+                class="delete-btn"
+                data-asset-id="{{video.assetId}}"
+                data-name="{{video.originalFileName}}"
+                loading="{{deletingAssetId === video.assetId}}"
+                disabled="{{deletingAssetId === video.assetId}}"
+                catchtap="onDeleteVideo"
+              >删除</button>
+            </view>
           </view>
         </view>
       </view>
@@ -95,8 +108,12 @@
         <text class="video-section-title video-section-title--processed">已处理视频</text>
         <view class="video-list">
           <view wx:for="{{item.processedVideos}}" wx:key="assetId" wx:for-item="video" class="video-row">
-            <text class="video-name">第 {{video.episodeNo}} 集 · {{video.originalFileName}}</text>
-            <text class="video-status video-status-{{video.statusClass}}">{{video.statusLabel}}</text>
+            <view class="video-main">
+              <text class="video-name">第 {{video.episodeNo}} 集 · {{video.originalFileName}}</text>
+            </view>
+            <view class="video-actions">
+              <text class="video-status video-status-{{video.statusClass}}">{{video.statusLabel}}</text>
+            </view>
           </view>
         </view>
       </view>

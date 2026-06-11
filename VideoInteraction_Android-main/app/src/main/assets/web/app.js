@@ -96,7 +96,7 @@
         generationApiKey: ""
       }
     },
-    rag: { groups: [], selectedBatchId: null, activeTask: null, busy: false, expanded: {} },
+    rag: { groups: [], selectedBatchId: null, activeTask: null, busy: false, expanded: {}, deletingAssetId: null },
     timers: { rag: null, toast: null, seek: null, speedTip: null },
     gesture: {
       startX: 0,
@@ -224,6 +224,7 @@
     logout: () => request("/auth/logout", "POST"),
     createUploadBatch: (data) => request("/uploads/batches", "POST", data),
     completeUploadBatch: (batchId, data) => request(`/uploads/batches/${batchId}/complete`, "POST", Array.isArray(data) ? { assetIds: data } : data),
+    deleteUploadAsset: (assetId) => request(`/uploads/assets/${assetId}`, "DELETE"),
     getPendingVideos: () => request("/analysis-tasks/pending-videos"),
     getActiveTask: () => request("/analysis-tasks/active"),
     getAnalysisTask: (taskId) => request(`/analysis-tasks/${taskId}`),
@@ -1059,10 +1060,15 @@
 
   function renderRagVideoRow(video) {
     const status = normalizeRagStatus(video);
+    const name = video.originalFileName || video.normalizedFileName || video.assetId;
+    const deleting = Number(state.rag.deletingAssetId || 0) === Number(video.assetId || 0);
     return `
       <div class="rag-video-row">
-        <span>第 ${Number(video.episodeNo || 0) || ""} 集 · ${escapeHtml(video.originalFileName || video.normalizedFileName || video.assetId)}</span>
-        <b class="${ragStatusClass(status)}">${escapeHtml(ragStatusLabel(status))}</b>
+        <span>第 ${Number(video.episodeNo || 0) || ""} 集 · ${escapeHtml(name)}</span>
+        <div class="rag-video-actions">
+          <b class="${ragStatusClass(status)}">${escapeHtml(ragStatusLabel(status))}</b>
+          ${video.canDelete ? `<button class="rag-delete" data-action="deleteRagVideo" data-asset-id="${escapeAttr(video.assetId)}" data-name="${escapeAttr(name)}" ${deleting ? "disabled" : ""}>${deleting ? "删除中" : "删除"}</button>` : ""}
+        </div>
       </div>
     `;
   }
@@ -1169,6 +1175,7 @@
     }
     else if (action === "startRag") startRag();
     else if (action === "retryRag") retryRag(target.dataset.taskId);
+    else if (action === "deleteRagVideo") deleteRagVideo(target.dataset.assetId, target.dataset.name);
   }
 
   function onInput(event) {
@@ -2972,6 +2979,24 @@
     }
   }
 
+  async function deleteRagVideo(assetId, name) {
+    const id = Number(assetId || 0);
+    if (!id || state.rag.deletingAssetId) return;
+    if (!window.confirm(`确定删除「${name || "该视频"}」吗？删除后需要重新上传才能再次处理。`)) return;
+    state.rag.deletingAssetId = id;
+    renderPreservingScroll(".rag-screen");
+    try {
+      await api.deleteUploadAsset(id);
+      toast("已删除");
+      await refreshRag();
+    } catch (err) {
+      showError(err);
+    } finally {
+      state.rag.deletingAssetId = null;
+      if (state.route === "rag") renderPreservingScroll(".rag-screen");
+    }
+  }
+
   function startRagTimer() {
     clearRagTimer();
     state.timers.rag = setInterval(async () => {
@@ -2994,7 +3019,13 @@
 
   function normalizeGroups(groups) {
     return (groups || []).filter(canUseRagGroup).map((group) => {
-      const videos = (group.videos || []).map((video) => Object.assign({}, video, { ragStatus: normalizeRagStatus(video) }));
+      const videos = (group.videos || []).map((video) => {
+        const ragStatus = normalizeRagStatus(video);
+        return Object.assign({}, video, {
+          ragStatus,
+          canDelete: canDeleteUploadedVideo(video, ragStatus)
+        });
+      });
       const stats = buildRagStats(videos);
       const unprocessedVideos = videos.filter((video) => isStartableRagStatus(video.ragStatus));
       const processedVideos = videos.filter((video) => isProcessed(video.ragStatus));
@@ -3305,6 +3336,11 @@
 
   function isStartableRagStatus(status) {
     return ["PENDING", "FAILED"].includes(normalizeRagStatus(status));
+  }
+
+  function canDeleteUploadedVideo(video, status) {
+    if (!video || String(video.status || "").toUpperCase() === "DELETED") return false;
+    return ["WAITING_UPLOAD", "PENDING", "FAILED"].includes(normalizeRagStatus(status || video));
   }
 
   function isProcessed(status) {

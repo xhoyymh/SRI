@@ -2335,6 +2335,27 @@ body.comments-open .tab-bar {
   font-size: 12px;
 }
 
+.rag-video-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rag-delete {
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 125, 140, 0.36);
+  border-radius: 7px;
+  background: rgba(255, 125, 140, 0.12);
+  color: #ff9aa6;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.rag-delete:disabled {
+  opacity: 0.6;
+}
+
 .rag-status-generated {
   color: #35d87b;
 }

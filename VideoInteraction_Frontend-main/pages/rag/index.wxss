@@ -246,9 +246,13 @@
   border-top: 1rpx solid #252b31;
 }
 
-.video-name {
+.video-main {
   flex: 1;
   min-width: 0;
+}
+
+.video-name {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -256,9 +260,28 @@
   font-size: 24rpx;
 }
 
+.video-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
 .video-status {
   flex-shrink: 0;
   font-size: 23rpx;
+}
+
+.delete-btn {
+  margin: 0;
+  min-width: 88rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  padding: 0 14rpx;
+  border-radius: 8rpx;
+  background: #3a2224;
+  color: #ff7b7b;
+  font-size: 22rpx;
 }
 
 .video-status-pending {

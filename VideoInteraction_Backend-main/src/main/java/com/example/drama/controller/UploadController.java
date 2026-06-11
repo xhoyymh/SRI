@@ -67,6 +67,15 @@ public class UploadController {
         return ApiResponse.success(uploadService.getUploadAsset(assetId));
     }
 
+    @DeleteMapping("/assets/{assetId}")
+    @Operation(summary = "删除自己上传的源视频")
+    public ApiResponse<Void> deleteUploadAsset(@PathVariable("assetId") Long assetId,
+                                               @RequestHeader(value = "Authorization", required = false) String authorization) {
+        UserAccount user = authService.requireUser(authorization);
+        uploadService.deleteUploadAsset(assetId, user);
+        return ApiResponse.success();
+    }
+
     @PostMapping(value = "/assets/{assetId}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "上传源视频文件到后端并转存 COS")
     public ApiResponse<UploadAssetUploadVO> uploadAssetFile(@PathVariable("assetId") Long assetId,

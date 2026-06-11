@@ -235,6 +235,42 @@ public class UploadService {
         return toUploadAssetVO(asset);
     }
 
+    @Transactional
+    public void deleteUploadAsset(Long assetId, UserAccount user) {
+        VideoAsset asset = videoAssetMapper.selectById(assetId);
+        if (asset == null || !"SOURCE_VIDEO".equals(asset.getAssetType())) {
+            throw new BusinessException(ResultCode.RESOURCE_NOT_FOUND);
+        }
+        UploadBatch batch = asset.getBatchId() == null ? null : uploadBatchMapper.selectById(asset.getBatchId());
+        if (batch == null) {
+            throw new BusinessException(ResultCode.RESOURCE_NOT_FOUND);
+        }
+        ensureBatchOwner(batch, user);
+        if (!isDeletableRagStatus(asset)) {
+            throw new BusinessException(ResultCode.PARAM_VALIDATION_FAILED.getCode(), "视频正在处理或已生成结果，暂不能删除");
+        }
+        if ("DELETED".equals(asset.getStatus())) {
+            return;
+        }
+
+        if (hasText(asset.getCosKey())) {
+            boolean deleted = cosPostPolicyService.deleteObjectBestEffort(asset.getCosKey());
+            if (!deleted) {
+                log.warn("用户删除视频时 COS 对象未确认删除 assetId={}, key={}", asset.getId(), asset.getCosKey());
+            }
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        asset.setStatus("DELETED");
+        asset.setRagStatus("DELETED");
+        asset.setRagTaskId(null);
+        asset.setRagMessage("用户已删除");
+        asset.setRagUpdateTime(now);
+        asset.setUpdateTime(now);
+        videoAssetMapper.updateById(asset);
+        refreshBatchAfterAssetDelete(batch, now);
+    }
+
     private UploadAssetUploadVO toUploadAssetVO(VideoAsset asset) {
         UploadAssetUploadVO vo = new UploadAssetUploadVO();
         vo.setAssetId(asset.getId());
@@ -460,6 +496,31 @@ public class UploadService {
         if (ownerId != null && (user == null || !ownerId.equals(user.getId()))) {
             throw new BusinessException(403, "只能操作自己上传的批次");
         }
+    }
+
+    private boolean isDeletableRagStatus(VideoAsset asset) {
+        String ragStatus = asset.getRagStatus();
+        if (ragStatus == null || ragStatus.isBlank()) {
+            ragStatus = "PENDING";
+        }
+        ragStatus = ragStatus.toUpperCase();
+        return "WAITING_UPLOAD".equals(ragStatus)
+                || "PENDING".equals(ragStatus)
+                || "FAILED".equals(ragStatus);
+    }
+
+    private void refreshBatchAfterAssetDelete(UploadBatch batch, LocalDateTime now) {
+        Long remaining = videoAssetMapper.selectCount(new LambdaQueryWrapper<VideoAsset>()
+                .eq(VideoAsset::getBatchId, batch.getId())
+                .eq(VideoAsset::getAssetType, "SOURCE_VIDEO")
+                .ne(VideoAsset::getStatus, "DELETED"));
+        int count = remaining == null ? 0 : remaining.intValue();
+        batch.setFileCount(count);
+        if (count == 0) {
+            batch.setStatus("DELETED");
+        }
+        batch.setUpdateTime(now);
+        uploadBatchMapper.updateById(batch);
     }
 
     private void verifyCosObjectBestEffort(VideoAsset asset) {

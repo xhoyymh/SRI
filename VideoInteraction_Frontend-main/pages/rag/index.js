@@ -1,4 +1,5 @@
 const analysisApi = require('../../api/analysis')
+const uploadApi = require('../../api/upload')
 const taskManager = require('../../utils/task-manager')
 const authStore = require('../../utils/auth-store')
 
@@ -17,6 +18,7 @@ Page({
     generationApiKey: '',
     loading: false,
     starting: false,
+    deletingAssetId: null,
     ragState: {}
   },
 
@@ -85,6 +87,34 @@ Page({
 
   onSelectGroup(e) {
     this.setData({ selectedBatchId: Number(e.currentTarget.dataset.batchId) })
+  },
+
+  onDeleteVideo(e) {
+    const assetId = Number(e.currentTarget.dataset.assetId)
+    const name = e.currentTarget.dataset.name || '该视频'
+    if (!assetId || this.data.deletingAssetId) return
+    wx.showModal({
+      title: '删除视频',
+      content: `确定删除「${name}」吗？删除后需要重新上传才能再次处理。`,
+      confirmText: '删除',
+      confirmColor: '#ff5a5f',
+      success: (res) => {
+        if (res.confirm) this.deleteVideo(assetId)
+      }
+    })
+  },
+
+  async deleteVideo(assetId) {
+    this.setData({ deletingAssetId: assetId })
+    try {
+      await uploadApi.deleteUploadAsset(assetId)
+      wx.showToast({ title: '已删除', icon: 'success' })
+      await this.loadPendingVideos()
+    } catch (err) {
+      wx.showToast({ title: taskErrorText(err).slice(0, 80), icon: 'none' })
+    } finally {
+      this.setData({ deletingAssetId: null })
+    }
   },
 
   toggleGroupDetails(e) {
@@ -161,7 +191,8 @@ function normalizeGroups(groups) {
       return Object.assign({}, video, {
         ragStatus,
         statusLabel: ragStatusLabel(ragStatus),
-        statusClass: statusClass(ragStatus)
+        statusClass: statusClass(ragStatus),
+        canDelete: canDeleteVideo(video, ragStatus)
       })
     })
     const counts = countStatuses(videos)
@@ -239,6 +270,11 @@ function splitVideosByProcessed(videos) {
 
 function isProcessedRagStatus(status) {
   return status === 'ANALYZED' || status === 'NO_INTERACTION'
+}
+
+function canDeleteVideo(video, ragStatus) {
+  if (!video || video.status === 'DELETED') return false
+  return ['WAITING_UPLOAD', 'PENDING', 'FAILED'].indexOf(ragStatus) >= 0
 }
 
 function compareGroupOrder(a, b) {

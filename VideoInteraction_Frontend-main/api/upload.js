@@ -27,6 +27,10 @@ function getUploadAsset(assetId) {
   return request({ url: `/uploads/assets/${assetId}` })
 }
 
+function deleteUploadAsset(assetId) {
+  return request({ url: `/uploads/assets/${assetId}`, method: 'DELETE' })
+}
+
 function getCosAuthorization(options) {
   return request({ url: '/uploads/cos/authorization', method: 'POST', data: options })
 }
@@ -268,4 +272,4 @@ function mockUpload(onProgress) {
   })
 }
 
-module.exports = { createUploadBatch, completeUploadBatch, getUploadAsset, uploadAssetToCos, getCosAuthorization }
+module.exports = { createUploadBatch, completeUploadBatch, getUploadAsset, deleteUploadAsset, uploadAssetToCos, getCosAuthorization }
