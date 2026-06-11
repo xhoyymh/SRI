@@ -1,0 +1,4 @@
+module.exports = {
+  COS_SECRET_ID: '',
+  COS_SECRET_KEY: ''
+}

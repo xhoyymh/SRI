@@ -1,0 +1,47 @@
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Node / mini program
+node_modules/
+project.private.config.json
+utils/local-secrets.js
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Java / Android / Gradle
+target/
+build/
+.gradle/
+local.properties
+*.class
+*.jar
+*.war
+*.apk
+*.aab
+
+# Runtime / generated data
+*.log
+*.pid
+*.tmp
+*.bak
+*.sqlite
+*.db
+*.mp4
+*.mov
+*.avi
+*.mkv
+data/runtime/
+data/work*/
+data/raw_videos*/
+
+# Local backend profiles and secrets
+application-local.yml
+src/main/resources/application-local.yml
+

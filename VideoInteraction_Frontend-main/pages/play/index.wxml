@@ -1,0 +1,386 @@
+<!-- pages/play/index.wxml - 播放页 -->
+<view class="container">
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 视频播放器：铺满屏幕，竖屏 cover 占满 / 横屏 contain 居中成横带 -->
+  <video
+    wx:if="{{videoUrl}}"
+    id="dramavideo"
+    class="drama-video {{commentPanel.show || dramaCommentPanel.show ? 'drama-video--mini' : ''}}"
+    src="{{videoUrl}}"
+    initial-time="{{videoInitialTime}}"
+    object-fit="{{commentPanel.show || dramaCommentPanel.show ? 'contain' : objectFit}}"
+    controls="{{useNativeVideoControls}}"
+    autoplay="{{videoAutoplay}}"
+    show-center-play-btn="{{useNativeVideoControls}}"
+    show-play-btn="{{useNativeVideoControls}}"
+    show-progress="{{useNativeVideoControls}}"
+    enable-progress-gesture="{{useNativeVideoControls}}"
+    show-fullscreen-btn="{{false}}"
+    bindplay="onPlay"
+    bindpause="onPause"
+    bindtimeupdate="onTimeUpdate"
+    bindended="onVideoEnded"
+    binderror="onVideoError"
+    bindwaiting="onVideoWaiting"
+    bindprogress="onVideoProgress"
+    bindloadedmetadata="onVideoLoaded"
+    bindloadeddata="onVideoFirstFrame"
+    bindseekcomplete="onVideoSeekComplete"
+  ></video>
+
+  <cover-view wx:if="{{videoUrl && !commentPanel.show && !dramaCommentPanel.show}}" class="play-video-overlay {{useNativeVideoControls ? 'play-video-overlay--native' : ''}}">
+    <cover-view wx:if="{{currentEpisodeNo && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="play-top-left">
+      <cover-view class="play-back" catchtap="onBack">‹</cover-view>
+      <cover-view class="play-episode-label" catchtap="openEpisodePanel">第{{currentEpisodeNo}}集</cover-view>
+    </cover-view>
+
+    <!-- 标题浮层：盖在原生 video 上必须用 cover-view -->
+    <cover-view wx:if="{{title && !dramaMeta.title && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="title-overlay {{taskBars.length ? 'title-overlay--with-task-bars' : ''}} {{taskBars.length > 1 ? 'title-overlay--with-many-task-bars' : ''}}">{{title}}</cover-view>
+
+    <!-- 点击层：点屏切换播放/暂停（置于交互按钮之下，空白处才触发） -->
+    <cover-view
+      wx:if="{{!useNativeVideoControls && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}"
+      class="tap-layer"
+      catchtap="onTapVideo"
+      catchtouchstart="onSpeedTouchStart"
+      catchtouchmove="onSpeedMove"
+      catchtouchend="onSpeedEnd"
+      catchtouchcancel="onSpeedEnd"
+    ></cover-view>
+
+    <!-- 二倍速提示 -->
+    <cover-view wx:if="{{!useNativeVideoControls && (speeding || speedLocked) && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="speed-tip">{{speedLockText}}</cover-view>
+
+    <cover-view
+      wx:if="{{!useNativeVideoControls && !playing && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}"
+      class="center-play"
+      catchtap="onTapVideo"
+    >
+      <cover-view class="center-play-tri">▶</cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{!useNativeVideoControls && !episodePanel && !actionVideoActive && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="speed-button" catchtap="toggleSpeedMenu">
+      <cover-view class="speed-clock">◷</cover-view>
+      <cover-view class="speed-label">倍速</cover-view>
+    </cover-view>
+    <cover-view wx:if="{{!useNativeVideoControls && speedMenu && !actionVideoActive && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="speed-menu {{episodePanel ? 'speed-menu--panel' : ''}}">
+      <cover-view
+        wx:for="{{speedOptions}}"
+        wx:key="*this"
+        class="speed-option {{item == playbackRate ? 'speed-option--active' : ''}}"
+        data-rate="{{item}}"
+        catchtap="setPlaybackRate"
+      >{{item}}x</cover-view>
+    </cover-view>
+
+    <!-- 高光互动浮层（emotion_button）：右侧竖排，盖在播放画面上 -->
+    <cover-view wx:if="{{overlay.show && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="overlay">
+      <cover-view
+        wx:for="{{overlay.buttons}}"
+        wx:key="optionCode"
+        class="emotion-item {{item.animating ? 'emotion-item--anim' : ''}}"
+        data-option-code="{{item.optionCode}}"
+        catchtap="onTapEmotion"
+        catchtouchend="onTapEmotion"
+      >
+        <cover-view class="emotion-row">
+          <cover-image class="emotion-icon" src="{{item.icon}}" />
+          <cover-view class="emotion-count">×{{item.currentCount || 0}}</cover-view>
+        </cover-view>
+      </cover-view>
+    </cover-view>
+
+    <!-- 点击表情爆发：一簇图标从底部散开往上飘并淡出 -->
+    <cover-view
+      wx:if="{{!commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}"
+      wx:for="{{floats}}"
+      wx:key="id"
+      class="float"
+      style="left: {{item.left}}rpx; width: {{item.size}}rpx; height: {{item.size}}rpx; transform: translate({{item.rise ? item.driftX : 0}}rpx, {{item.rise ? -item.riseY : 0}}rpx); opacity: {{item.rise ? 0 : 1}};"
+    >
+      <cover-image class="float-icon" src="{{item.icon}}" />
+    </cover-view>
+
+    <cover-view
+      wx:if="{{!commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}"
+      wx:for="{{danmakuTexts}}"
+      wx:key="id"
+      class="danmaku-text {{item.move ? 'danmaku-text--move' : ''}} {{item.kind === 'stat' || item.kind === 'highlight' ? 'danmaku-text--stat' : ''}} {{item.kind === 'user' ? 'danmaku-text--user' : ''}}"
+      style="top: {{item.top}}rpx;"
+    >{{item.text}}</cover-view>
+
+    <!-- 右下角大图：点击弹出，一动一动 -->
+    <cover-image
+      wx:if="{{bigImage.show && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}"
+      class="big-image {{bigImage.beat ? 'big-image--beat' : ''}}"
+      src="{{bigImage.src}}"
+    />
+
+    <cover-view wx:if="{{!actionLockActive && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !story.show}}" class="drama-social-actions">
+      <cover-view class="drama-social-btn {{dramaSocial.favorited ? 'drama-social-btn--active' : ''}}" catchtap="onTapDramaFavorite">
+        <cover-view class="drama-social-icon drama-social-icon-star">★</cover-view>
+        <cover-view class="drama-social-text">{{dramaSocial.favoriteCount || 0}}</cover-view>
+      </cover-view>
+      <cover-view class="drama-social-btn" catchtap="openDramaComments">
+        <cover-view class="drama-social-icon drama-social-icon-comment">•••</cover-view>
+        <cover-view class="drama-social-text">{{dramaSocial.commentCount || 0}}</cover-view>
+      </cover-view>
+      <cover-view class="drama-social-btn {{dramaSocial.liked ? 'drama-social-btn--active' : ''}}" catchtap="onTapDramaLike">
+        <cover-view class="drama-social-icon drama-social-icon-heart">♥︎</cover-view>
+        <cover-view class="drama-social-text">{{dramaSocial.likeCount || 0}}</cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{dramaMeta.title && !actionLockActive && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !story.show}}" class="play-drama-info {{taskBars.length ? 'play-drama-info--with-task-bars' : ''}} {{taskBars.length > 1 ? 'play-drama-info--with-many-task-bars' : ''}}">
+      <cover-view class="danmaku-send-btn" catchtap="openDanmakuInput">弹/</cover-view>
+      <cover-view class="play-drama-name">{{dramaMeta.title}}</cover-view>
+    </cover-view>
+
+    <!-- 选集入口：底部，位于进度条之上不遮挡 -->
+    <cover-view wx:if="{{!useNativeVideoControls && !episodePanel && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="episode-entry {{taskBars.length ? 'episode-entry--with-task-bars' : ''}} {{taskBars.length > 1 ? 'episode-entry--with-many-task-bars' : ''}}" catchtap="openEpisodePanel">选集 ›</cover-view>
+
+    <!-- 拖动时显示 当前/总时长 -->
+    <cover-view wx:if="{{!useNativeVideoControls && seeking && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="seek-time">{{seekText}}</cover-view>
+
+    <cover-view wx:if="{{!useNativeVideoControls && taskBars.length && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}" class="play-task-bars">
+      <cover-view
+        wx:for="{{taskBars}}"
+        wx:key="type"
+        class="play-task-bar play-task-bar-{{item.type}}"
+        data-type="{{item.type}}"
+        bindtap="onTapTaskBar"
+      >
+        <cover-view class="play-task-bar-row">
+          <cover-view>{{item.title}}</cover-view>
+          <cover-view>{{item.progress}}%</cover-view>
+        </cover-view>
+        <cover-view class="play-task-bar-track">
+          <cover-view class="play-task-bar-fill" style="width: {{item.progress}}%;"></cover-view>
+        </cover-view>
+        <cover-view class="play-task-bar-message">{{item.message}}</cover-view>
+      </cover-view>
+    </cover-view>
+
+    <!-- 底部进度条：默认只有进度；拖动时显示时长 -->
+    <cover-view
+      wx:if="{{!useNativeVideoControls && !episodePanel && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}"
+      id="play-progress-track"
+      class="progress-track {{taskBars.length ? 'progress-track--with-task-bars' : ''}} {{taskBars.length > 1 ? 'progress-track--with-many-task-bars' : ''}}"
+      catchtap="onSeekTouch"
+      catchtouchstart="onSeekTouch"
+      catchtouchmove="onSeekTouch"
+      catchtouchend="onSeekEnd"
+      catchtouchcancel="onSeekEnd"
+    >
+      <cover-view class="progress-bar {{seeking ? 'progress-bar--active' : ''}}">
+        <cover-view class="progress-fill" style="width: {{progressPercent}}%;">
+          <cover-view class="progress-knob"></cover-view>
+        </cover-view>
+      </cover-view>
+    </cover-view>
+
+    <!-- 分支选择弹窗 -->
+    <cover-view wx:if="{{branch.show}}" class="branch-mask">
+      <cover-view class="branch-box">
+        <cover-view class="branch-title">{{branch.title}}</cover-view>
+        <cover-view
+          wx:for="{{branch.options}}"
+          wx:key="optionCode"
+          class="branch-opt {{item.disabled ? 'branch-opt--disabled' : ''}}"
+          data-index="{{index}}"
+          bindtap="onTapBranch"
+        >{{item.label}}</cover-view>
+      </cover-view>
+    </cover-view>
+
+    <!-- 动作互动按钮 -->
+    <cover-view wx:if="{{action.show}}" class="action-mask">
+      <cover-view class="action-box">
+        <cover-view class="action-btn" bindtap="onTapAction">{{action.label}}</cover-view>
+      </cover-view>
+    </cover-view>
+    <cover-view wx:if="{{actionPrompt.show}}" class="action-mask">
+      <cover-view class="action-box">
+        <cover-view class="action-btn" bindtap="onTapActionPrompt">{{actionPrompt.label}}</cover-view>
+      </cover-view>
+    </cover-view>
+    <cover-view wx:if="{{actionLockActive && !action.show && !actionPrompt.show && !actionSpeedBoost.show}}" class="action-video-lock"></cover-view>
+    <cover-view wx:if="{{actionSpeedBoost.show}}" class="speed-boost-mask" bindtap="dismissActionSpeedBoost">
+      <cover-view class="speed-boost-card" catchtap="onTapActionSpeedBoost">
+        <cover-view class="speed-boost-text">{{action.speedBoost.label}}</cover-view>
+      </cover-view>
+    </cover-view>
+
+    <!-- 错误分支黑屏：缓慢浮现文案 + 重新选择 -->
+    <cover-view wx:if="{{blackout.show}}" class="blackout">
+      <cover-view wx:if="{{blackout.text}}" class="blackout-text {{blackout.visible ? 'blackout-text--in' : ''}}">{{blackout.text}}</cover-view>
+      <cover-view class="blackout-retry {{blackout.visible ? 'blackout-retry--in' : ''}}" bindtap="onRetryBranch">重新选择</cover-view>
+    </cover-view>
+
+    <!-- 生成内容：TEXT 文本弹窗 -->
+    <cover-view wx:if="{{story.show && story.contentType === 'TEXT'}}" class="story-text">
+      <cover-view class="story-text-title">{{story.title}}</cover-view>
+      <cover-view class="story-text-body">{{story.content}}</cover-view>
+      <cover-view class="story-text-close" bindtap="closeStory">关闭</cover-view>
+    </cover-view>
+
+    <!-- 生成内容：IMAGE_SEQ 图片轮播 -->
+    <cover-view wx:if="{{story.show && story.contentType === 'IMAGE_SEQ'}}" class="story-image">
+      <cover-view class="story-image-title">{{story.title}}</cover-view>
+      <cover-image wx:if="{{story.currentImage}}" class="story-image-pic" src="{{story.currentImage}}" mode="aspectFit" />
+      <cover-view wx:else class="story-image-empty">{{story.content}}</cover-view>
+      <cover-view class="story-image-tools">
+        <cover-view class="story-image-tool" bindtap="prevImageSeq">上一张</cover-view>
+        <cover-view class="story-image-index">{{story.imageIndex + 1}} / {{story.images.length || 1}}</cover-view>
+        <cover-view class="story-image-tool" bindtap="nextImageSeq">下一张</cover-view>
+      </cover-view>
+      <cover-view class="story-text-close" bindtap="closeStory">关闭</cover-view>
+    </cover-view>
+
+    <!-- 选集面板 -->
+    <cover-view wx:if="{{episodePanel}}" class="ep-mask" catchtap="closeEpisodePanel"></cover-view>
+    <cover-view wx:if="{{episodePanel}}" class="ep-panel">
+      <cover-view class="ep-handle"></cover-view>
+      <cover-view class="ep-meta">
+        <cover-image wx:if="{{dramaMeta.coverUrl}}" class="ep-cover" src="{{dramaMeta.coverUrl}}" />
+        <cover-view wx:else class="ep-cover ep-cover--empty"></cover-view>
+        <cover-view class="ep-info">
+          <cover-view class="ep-title-line">
+            <cover-view class="ep-title">{{dramaMeta.title || title}}</cover-view>
+          </cover-view>
+          <cover-view class="ep-subtitle">已完结 · 共{{dramaMeta.episodeCount || episodes.length}}集</cover-view>
+        </cover-view>
+      </cover-view>
+      <cover-view wx:if="{{dramaMeta.tags && dramaMeta.tags.length}}" class="ep-tags">
+        <cover-view
+          wx:for="{{dramaMeta.tags}}"
+          wx:key="*this"
+          class="ep-tag"
+          data-keyword="{{item}}"
+          catchtap="onTapEpisodeTag"
+        >{{item}}</cover-view>
+      </cover-view>
+      <cover-view class="ep-range-tabs">
+        <cover-view
+          wx:for="{{episodeRanges}}"
+          wx:key="index"
+          data-index="{{item.index}}"
+          class="ep-range {{item.index === activeEpisodeRangeIndex ? 'ep-range--cur' : ''}}"
+          catchtap="selectEpisodeRange"
+        >{{item.label}}</cover-view>
+      </cover-view>
+      <cover-view class="ep-grid">
+        <cover-view
+          wx:for="{{visibleEpisodes}}"
+          wx:key="episodeId"
+          class="ep-item {{item.episodeId === episodeId ? 'ep-item--cur' : ''}}"
+          data-id="{{item.episodeId}}"
+          catchtap="switchEpisode"
+        >
+          <cover-view wx:if="{{item.episodeId === episodeId}}" class="ep-playing-mark">Ⅱ</cover-view>
+          <cover-view class="ep-num">{{item.episodeNo}}</cover-view>
+        </cover-view>
+      </cover-view>
+      <cover-view class="ep-fav-btn {{dramaSocial.favorited ? 'ep-fav-btn--active' : ''}}" catchtap="onTapDramaFavorite">☆ {{dramaSocial.favorited ? '已收藏' : '收藏'}}</cover-view>
+    </cover-view>
+  </cover-view>
+
+  <cover-view
+    wx:if="{{commentPanel.show}}"
+    class="comment-close-layer"
+    catchtap="closeComments"
+  ></cover-view>
+  <cover-view
+    wx:if="{{dramaCommentPanel.show}}"
+    class="comment-close-layer"
+    catchtap="closeDramaComments"
+  ></cover-view>
+
+  <!-- 评论面板：视频缩到顶部继续播放，下方展开评论（普通组件，可用 input/scroll-view） -->
+  <view wx:if="{{commentPanel.show}}" class="cmt-wrap">
+    <view class="cmt-panel">
+      <view class="cmt-head">
+        <view class="cmt-collapse" bindtap="closeComments">关闭</view>
+        <view class="cmt-title">{{commentPanel.total || commentPanel.list.length || 0}}条评论</view>
+      </view>
+      <view class="cmt-search">大家都在搜：<text data-keyword="{{dramaMeta.title || title}}" bindtap="onTapCommentSearch">{{dramaMeta.title || title}}</text><text class="cmt-search-icon" data-keyword="{{dramaMeta.title || title}}" bindtap="onTapCommentSearch">⌕</text></view>
+      <scroll-view class="cmt-list" scroll-y>
+        <view wx:for="{{commentPanel.list}}" wx:key="commentId" class="cmt-item">
+          <view class="cmt-avatar">{{item.avatar || '评'}}</view>
+          <view class="cmt-main">
+            <view class="cmt-nick">{{item.nickname || '用户'}}</view>
+            <view class="cmt-content">{{item.content}}</view>
+            <view class="cmt-meta">
+              <text>{{item.timeText || item.createTime || '刚刚'}}</text>
+              <text class="cmt-reply">回复</text>
+            </view>
+          </view>
+          <view class="cmt-like">
+            <view class="cmt-like-icon">♥︎</view>
+            <view wx:if="{{item.likeCount}}" class="cmt-like-count">{{item.likeCount}}</view>
+          </view>
+        </view>
+        <view wx:if="{{commentPanel.list.length === 0}}" class="cmt-empty">还没有评论，抢个沙发</view>
+      </scroll-view>
+      <view class="cmt-input-row">
+        <input
+          class="cmt-input"
+          value="{{commentPanel.input}}"
+          placeholder="有趣评论千千万，不如你也来一条？"
+          confirm-type="send"
+          bindinput="onCommentInput"
+          bindconfirm="onSendComment"
+        />
+        <view class="cmt-send" bindtap="onSendComment">发送</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && !videoUrl}}" class="empty">
+    <text>暂无视频</text>
+  </view>
+
+  <view wx:if="{{dramaCommentPanel.show}}" class="cmt-wrap">
+    <view class="cmt-panel">
+      <view class="cmt-head">
+        <view class="cmt-collapse" bindtap="closeDramaComments">关闭</view>
+        <view class="cmt-title">{{dramaSocial.commentCount || 0}}条评论</view>
+      </view>
+      <view class="cmt-search">大家都在搜：<text data-keyword="{{dramaMeta.title}}" bindtap="onTapCommentSearch">{{dramaMeta.title}}</text><text class="cmt-search-icon" data-keyword="{{dramaMeta.title}}" bindtap="onTapCommentSearch">⌕</text></view>
+      <scroll-view scroll-y class="cmt-list">
+        <view wx:for="{{dramaCommentPanel.list}}" wx:key="commentId" class="cmt-item">
+          <view class="cmt-avatar">{{item.avatar}}</view>
+          <view class="cmt-main">
+            <view class="cmt-nick">{{item.nickname}}</view>
+            <view class="cmt-content">{{item.content}}</view>
+            <view class="cmt-meta">
+              <text>{{item.timeText}}</text>
+              <text class="cmt-reply">回复</text>
+            </view>
+          </view>
+          <view class="cmt-like">
+            <view class="cmt-like-icon">♥︎</view>
+            <view wx:if="{{item.likeCount}}" class="cmt-like-count">{{item.likeCount}}</view>
+          </view>
+        </view>
+        <view wx:if="{{dramaCommentPanel.list.length === 0}}" class="cmt-empty">还没有评论，抢个沙发</view>
+      </scroll-view>
+      <view class="cmt-input-row">
+        <input
+          class="cmt-input"
+          placeholder="有趣评论千千万，不如你也来一条？"
+          value="{{dramaCommentPanel.input}}"
+          confirm-type="send"
+          bindinput="onDramaCommentInput"
+          bindconfirm="onSendDramaComment"
+        />
+        <view class="cmt-send" bindtap="onSendDramaComment">发送</view>
+      </view>
+    </view>
+  </view>
+</view>

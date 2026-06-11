@@ -1,0 +1,74 @@
+<!-- pages/upload/index.wxml - 视频上传工作台 -->
+<view class="page">
+  <view class="section">
+    <text class="section-title">短剧信息</text>
+    <input class="input" placeholder="剧名" value="{{dramaTitle}}" bindinput="onDramaTitleInput" />
+    <input class="input" placeholder="视频简介（必填）" value="{{videoDescription}}" bindinput="onVideoDescriptionInput" />
+    <view class="cover-field">
+      <view class="cover-preview" bindtap="chooseCoverImage">
+        <image wx:if="{{coverFile}}" class="cover-image" src="{{coverFile.path}}" mode="aspectFill" />
+        <view wx:else class="cover-placeholder">
+          <text class="cover-plus">+</text>
+        </view>
+      </view>
+      <view class="cover-meta">
+        <text class="cover-title">短剧封面</text>
+        <text wx:if="{{coverFile}}" class="cover-desc">{{coverFile.name}} · {{coverFile.sizeText}}</text>
+        <text wx:else class="cover-desc">用于剧场列表展示，可选</text>
+        <view class="cover-actions">
+          <button wx:if="{{coverFile}}" class="small-btn cover-btn" bindtap="chooseCoverImage">更换封面</button>
+          <button wx:else class="small-btn cover-btn" bindtap="chooseCoverImage">选择封面</button>
+          <button wx:if="{{coverFile}}" class="icon-btn" catchtap="removeCover">×</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">视频文件</text>
+      <view class="choose-actions">
+        <button class="small-btn" bindtap="chooseAlbumVideos">添加视频</button>
+      </view>
+    </view>
+    <view wx:if="{{files.length === 0}}" class="empty">选择要上传到 COS 的源视频，可按集数调整顺序。</view>
+    <view wx:for="{{files}}" wx:key="id" class="file-row">
+      <view class="file-main">
+        <text class="file-name">{{item.name}}</text>
+        <text class="file-status">{{item.sizeText}} · 第 {{item.episodeNo}} 集</text>
+      </view>
+      <input class="episode-input" type="number" value="{{item.episodeNo}}" data-index="{{index}}" bindinput="onEpisodeNoInput" />
+      <button class="icon-btn" data-index="{{index}}" bindtap="removeFile">×</button>
+    </view>
+  </view>
+
+  <view class="actions">
+    <button class="primary-btn" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitUpload">开始上传到 COS</button>
+    <button class="secondary-btn action-btn" bindtap="onGoHome">返回首页</button>
+  </view>
+
+  <view wx:if="{{uploadState.canEnterRag}}" class="section prompt-section" bindtap="onGoRag">
+    <view class="prompt-title">上传完成，点击进入 RAG 调用页面</view>
+    <text class="prompt-text">待处理视频会在 RAG 页面按剧名展示。</text>
+  </view>
+
+  <view wx:if="{{uploadState.jobs.length}}" class="section">
+    <text class="section-title">上传进度</text>
+    <view wx:for="{{uploadState.jobs}}" wx:key="id" wx:for-item="job" class="job">
+      <view class="task-line">
+        <text class="task-label">{{job.dramaTitle}}</text>
+        <text class="task-value">{{job.progress}}%</text>
+      </view>
+      <view class="progress">
+        <view class="progress-fill" style="width: {{job.progress || 0}}%;"></view>
+      </view>
+      <text class="task-message">{{job.message || job.errorMessage}}</text>
+      <view class="job-files">
+        <view wx:for="{{job.files}}" wx:key="id" wx:for-item="file" class="job-file">
+          <text class="job-file-name">{{file.name}}</text>
+          <text class="job-file-status">{{file.statusText}} · {{file.progress}}%</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

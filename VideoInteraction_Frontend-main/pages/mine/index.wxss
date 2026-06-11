@@ -1,0 +1,219 @@
+.mine {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 28rpx 24rpx 140rpx;
+  background: #101214;
+  color: #fff;
+}
+
+.auth-card,
+.profile,
+.switch-box,
+.tool-card,
+.record-card {
+  border-radius: 8rpx;
+  background: #191d22;
+}
+
+.auth-card {
+  padding: 28rpx;
+}
+
+.auth-title {
+  margin-bottom: 22rpx;
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.input {
+  height: 76rpx;
+  margin-bottom: 18rpx;
+  padding: 0 22rpx;
+  border-radius: 8rpx;
+  background: #252b33;
+  color: #fff;
+  font-size: 28rpx;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.primary-btn,
+.secondary-btn,
+.logout-btn {
+  height: 72rpx;
+  line-height: 72rpx;
+  margin: 0;
+  border-radius: 8rpx;
+  font-size: 27rpx;
+  font-weight: 800;
+}
+
+.primary-btn {
+  flex: 1;
+  background: #27c46b;
+  color: #07140c;
+}
+
+.secondary-btn {
+  flex: 1;
+  background: #2b87ff;
+  color: #fff;
+}
+
+.hint {
+  margin-top: 18rpx;
+  color: #a8b0ba;
+  font-size: 24rpx;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+}
+
+.profile-name {
+  font-size: 34rpx;
+  font-weight: 900;
+}
+
+.profile-sub {
+  margin-top: 6rpx;
+  color: #a8b0ba;
+  font-size: 24rpx;
+}
+
+.logout-btn {
+  width: 128rpx;
+  background: #303640;
+  color: #fff;
+}
+
+.switch-box {
+  margin-top: 20rpx;
+  padding: 22rpx;
+}
+
+.section-title {
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.user-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.user-pill {
+  padding: 10rpx 18rpx;
+  border-radius: 8rpx;
+  background: #262d35;
+  color: #d8dde4;
+  font-size: 24rpx;
+}
+
+.user-pill--active {
+  background: #ffd54a;
+  color: #141006;
+  font-weight: 800;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18rpx;
+  margin-top: 22rpx;
+}
+
+.tool-card {
+  padding: 24rpx;
+  background: #173823;
+}
+
+.tool-card--rag {
+  background: #17304a;
+}
+
+.tool-title {
+  margin-bottom: 10rpx;
+  font-size: 30rpx;
+  font-weight: 900;
+}
+
+.tool-desc {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 23rpx;
+  line-height: 32rpx;
+}
+
+.tabs {
+  display: flex;
+  gap: 12rpx;
+  margin: 28rpx 0 18rpx;
+}
+
+.tab {
+  flex: 1;
+  height: 64rpx;
+  line-height: 64rpx;
+  border-radius: 8rpx;
+  text-align: center;
+  background: #222831;
+  color: #d8dde4;
+  font-size: 26rpx;
+}
+
+.tab--active {
+  background: #ffd54a;
+  color: #141006;
+  font-weight: 900;
+}
+
+.record-card {
+  display: flex;
+  gap: 18rpx;
+  margin-bottom: 16rpx;
+  padding: 14rpx;
+}
+
+.record-cover {
+  width: 112rpx;
+  height: 148rpx;
+  border-radius: 6rpx;
+  background: #242a31;
+}
+
+.record-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.record-title {
+  margin-bottom: 10rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.record-desc {
+  height: 68rpx;
+  overflow: hidden;
+  color: #a8b0ba;
+  font-size: 23rpx;
+  line-height: 34rpx;
+}
+
+.empty {
+  padding: 80rpx 0;
+  text-align: center;
+  color: #a8b0ba;
+  font-size: 26rpx;
+}

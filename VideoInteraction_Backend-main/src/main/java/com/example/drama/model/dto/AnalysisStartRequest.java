@@ -1,0 +1,21 @@
+package com.example.drama.model.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class AnalysisStartRequest {
+    @NotEmpty
+    private List<Long> assetIds;
+
+    @NotBlank
+    private String judgeApiKey;
+
+    @NotBlank
+    private String judgeEndpointId;
+
+    private String generationApiKey;
+}

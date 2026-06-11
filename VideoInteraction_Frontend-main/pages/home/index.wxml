@@ -1,0 +1,228 @@
+<view class="home" bindtouchstart="onTouchStart" bindtouchend="onTouchEnd">
+  <video
+    wx:if="{{videoUrl}}"
+    id="homevideo"
+    class="home-video {{commentPanel.show ? 'home-video--commenting' : ''}}"
+    src="{{videoUrl}}"
+    initial-time="{{videoInitialTime}}"
+    object-fit="{{commentPanel.show ? 'contain' : 'cover'}}"
+    controls="{{useNativeVideoControls}}"
+    autoplay="{{videoAutoplay}}"
+    show-center-play-btn="{{useNativeVideoControls}}"
+    show-play-btn="{{useNativeVideoControls}}"
+    show-progress="{{useNativeVideoControls}}"
+    enable-progress-gesture="{{useNativeVideoControls}}"
+    show-fullscreen-btn="{{false}}"
+    loop="{{false}}"
+    bindloadedmetadata="onLoadedMeta"
+    bindplay="onPlay"
+    bindpause="onPause"
+    bindtimeupdate="onTimeUpdate"
+    bindended="onVideoEnded"
+    binderror="onVideoError"
+    bindtap="onTapVideo"
+  ></video>
+
+  <cover-view wx:if="{{videoUrl && !commentPanel.show}}" class="home-video-overlay {{useNativeVideoControls ? 'home-video-overlay--native' : ''}}">
+    <cover-view
+      wx:if="{{!useNativeVideoControls && !commentPanel.show}}"
+      class="tap-layer"
+      catchtap="onTapVideo"
+      catchtouchstart="onFeedTouchStart"
+      catchlongpress="onSpeedStart"
+      catchtouchmove="onSpeedMove"
+      catchtouchend="onFeedTouchEnd"
+      catchtouchcancel="onFeedTouchCancel"
+    ></cover-view>
+
+    <cover-view wx:if="{{!commentPanel.show}}" class="top-menu">
+      <cover-view class="menu-line"></cover-view>
+      <cover-view class="menu-line"></cover-view>
+      <cover-view class="menu-line"></cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{!commentPanel.show}}" class="top-actions">
+      <cover-view class="search-btn" bindtap="onTapSearch">
+        <cover-view class="search-icon">
+          <cover-view class="search-icon-ring"></cover-view>
+          <cover-view class="search-icon-handle"></cover-view>
+        </cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{!useNativeVideoControls && !commentPanel.show}}" class="speed-button" catchtap="toggleSpeedMenu">
+      <cover-view class="speed-clock">◷</cover-view>
+      <cover-view class="speed-label">倍速</cover-view>
+    </cover-view>
+    <cover-view wx:if="{{!useNativeVideoControls && speedMenu && !commentPanel.show}}" class="speed-menu">
+      <cover-view
+        wx:for="{{speedOptions}}"
+        wx:key="*this"
+        class="speed-option {{item == playbackRate ? 'speed-option--active' : ''}}"
+        data-rate="{{item}}"
+        catchtap="setPlaybackRate"
+      >{{item}}x</cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{!useNativeVideoControls && (speeding || speedLocked) && !commentPanel.show}}" class="speed-tip">{{speedLockText}}</cover-view>
+
+    <cover-view wx:if="{{!useNativeVideoControls && !playing && !commentPanel.show}}" class="center-play" catchtap="onTapVideo" catchtouchend="toggleVideoFromTouch">
+      <cover-view class="center-play-tri">▶</cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{overlay.show && !commentPanel.show}}" class="overlay {{descExpanded ? 'overlay--desc-expanded' : ''}}">
+      <cover-view
+        wx:for="{{overlay.buttons}}"
+        wx:key="optionCode"
+        class="emotion-item {{item.animating ? 'emotion-item--anim' : ''}}"
+        data-option-code="{{item.optionCode}}"
+        catchtap="onTapEmotion"
+        catchtouchend="onTapEmotion"
+      >
+        <cover-view class="emotion-row">
+          <cover-image class="emotion-icon" src="{{item.icon}}" />
+          <cover-view class="emotion-count">×{{item.currentCount || 0}}</cover-view>
+        </cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view
+      wx:if="{{!commentPanel.show}}"
+      wx:for="{{floats}}"
+      wx:key="id"
+      class="float"
+      style="left: {{item.left}}rpx; width: {{item.size}}rpx; height: {{item.size}}rpx; transform: translate({{item.rise ? item.driftX : 0}}rpx, {{item.rise ? -item.riseY : 0}}rpx); opacity: {{item.rise ? 0 : 1}};"
+    >
+      <cover-image class="float-icon" src="{{item.icon}}" />
+    </cover-view>
+
+    <cover-view
+      wx:if="{{!commentPanel.show}}"
+      wx:for="{{danmakuTexts}}"
+      wx:key="id"
+      class="danmaku-text {{item.move ? 'danmaku-text--move' : ''}} {{item.kind === 'stat' || item.kind === 'highlight' ? 'danmaku-text--stat' : ''}} {{item.kind === 'user' ? 'danmaku-text--user' : ''}}"
+      style="top: {{item.top}}rpx;"
+    >{{item.text}}</cover-view>
+
+    <cover-image
+      wx:if="{{bigImage.show && !commentPanel.show}}"
+      class="big-image {{bigImage.beat ? 'big-image--beat' : ''}}"
+      src="{{bigImage.src}}"
+    />
+
+    <cover-view wx:if="{{!commentPanel.show}}" class="social-actions">
+      <cover-view class="social-btn {{social.favorited ? 'social-btn--active' : ''}}" catchtap="onTapFavorite">
+        <cover-view class="social-icon social-icon-star">★</cover-view>
+        <cover-view class="social-text">{{social.favoriteCount || 0}}</cover-view>
+      </cover-view>
+      <cover-view class="social-btn" catchtap="openComments">
+        <cover-view class="social-icon social-icon-comment">•••</cover-view>
+        <cover-view class="social-text">{{social.commentCount || 0}}</cover-view>
+      </cover-view>
+      <cover-view class="social-btn {{social.liked ? 'social-btn--active' : ''}}" catchtap="onTapLike">
+        <cover-view class="social-icon social-icon-heart">♥︎</cover-view>
+        <cover-view class="social-text">{{social.likeCount || 0}}</cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{currentDrama && !commentPanel.show}}" class="drama-info">
+      <cover-view class="danmaku-send-btn" catchtap="openDanmakuInput">弹/</cover-view>
+      <cover-view class="drama-title" catchtap="onTapTitle">{{currentDrama.title}}</cover-view>
+      <cover-view class="tag-row">
+        <cover-view wx:for="{{currentDrama.tags}}" wx:key="*this" class="tag" data-tag="{{item}}" catchtap="onTapTag">{{item}}</cover-view>
+      </cover-view>
+      <cover-view wx:if="{{currentDrama.description}}" class="desc-row {{descExpanded ? 'desc-row--expanded' : 'desc-row--collapsed'}}" bindtap="onToggleDescription">
+        <cover-view class="desc {{descExpanded ? 'desc--expanded' : ''}}">{{descExpanded ? currentDrama.description : currentDrama.descriptionCollapsedText}}</cover-view>
+        <cover-view wx:if="{{currentDrama.descriptionClipped}}" class="desc-toggle">{{descExpanded ? '收起' : '展开'}}</cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{!useNativeVideoControls && seeking && !commentPanel.show}}" class="seek-time">{{seekText}}</cover-view>
+    <cover-view wx:if="{{!useNativeVideoControls && currentDrama && !commentPanel.show}}" class="watch-full" catchtap="onTapTitle">
+      <cover-view class="watch-play">▶</cover-view>
+      <cover-view class="watch-text">观看完整短剧 · 全{{currentDrama.episodeCount || 0}}集</cover-view>
+      <cover-view class="watch-arrow">›</cover-view>
+    </cover-view>
+    <cover-view
+      wx:if="{{!useNativeVideoControls && !commentPanel.show}}"
+      id="home-progress-track"
+      class="progress-track"
+      catchtap="onSeekTouch"
+      catchtouchstart="onSeekTouch"
+      catchtouchmove="onSeekTouch"
+      catchtouchend="onSeekEnd"
+      catchtouchcancel="onSeekEnd"
+    >
+      <cover-view class="progress-bar {{seeking ? 'progress-bar--active' : ''}}">
+        <cover-view class="progress-fill" style="width: {{progressPercent}}%;">
+          <cover-view class="progress-knob"></cover-view>
+        </cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{branch.show}}" class="branch-mask">
+      <cover-view class="branch-box">
+        <cover-view class="branch-title">{{branch.title}}</cover-view>
+        <cover-view
+          wx:for="{{branch.options}}"
+          wx:key="optionCode"
+          class="branch-opt"
+          data-index="{{index}}"
+          bindtap="onTapBranch"
+        >{{item.label}}</cover-view>
+      </cover-view>
+    </cover-view>
+
+    <cover-view wx:if="{{action.show}}" class="action-mask">
+      <cover-view class="action-box">
+        <cover-view class="action-btn" bindtap="onTapAction">{{action.label}}</cover-view>
+      </cover-view>
+    </cover-view>
+  </cover-view>
+
+  <cover-view
+    wx:if="{{commentPanel.show}}"
+    class="comment-close-layer"
+    catchtap="closeComments"
+  ></cover-view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+  <view wx:if="{{!loading && !videoUrl}}" class="empty">暂无可播放短剧</view>
+
+  <view wx:if="{{commentPanel.show}}" class="comment-panel">
+    <view class="comment-head">
+      <view class="comment-collapse" bindtap="closeComments">关闭</view>
+      <view class="comment-title">{{social.commentCount || 0}}条评论</view>
+    </view>
+    <view class="comment-search">大家都在搜：<text data-keyword="{{currentDrama.title}}" bindtap="onTapCommentSearch">{{currentDrama.title}}</text><text class="comment-search-icon" data-keyword="{{currentDrama.title}}" bindtap="onTapCommentSearch">⌕</text></view>
+    <scroll-view scroll-y class="comment-list">
+      <view wx:for="{{commentPanel.list}}" wx:key="commentId" class="comment-item">
+        <view class="comment-avatar">{{item.avatar}}</view>
+        <view class="comment-main">
+          <view class="comment-name">{{item.nickname}}</view>
+          <view class="comment-content">{{item.content}}</view>
+          <view class="comment-meta">
+            <text>{{item.timeText}}</text>
+            <text class="comment-reply">回复</text>
+          </view>
+        </view>
+        <view class="comment-like">
+          <view class="comment-like-icon">♥︎</view>
+          <view wx:if="{{item.likeCount}}" class="comment-like-count">{{item.likeCount}}</view>
+        </view>
+      </view>
+      <view wx:if="{{commentPanel.list.length === 0}}" class="comment-empty">还没有评论，抢个沙发</view>
+    </scroll-view>
+    <view class="comment-input-row">
+      <input
+        class="comment-input"
+        placeholder="有趣评论千千万，不如你也来一条？"
+        value="{{commentPanel.input}}"
+        confirm-type="send"
+        bindinput="onCommentInput"
+        bindconfirm="sendComment"
+      />
+      <view class="comment-send" bindtap="sendComment">发送</view>
+    </view>
+  </view>
+</view>

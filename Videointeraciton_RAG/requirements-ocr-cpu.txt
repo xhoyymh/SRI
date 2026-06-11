@@ -1,0 +1,8 @@
+# Optional CPU OCR dependencies.
+# Install this only on platforms where PaddlePaddle publishes wheels for your
+# Python version. Python 3.10/3.11 is the safest choice.
+
+-r requirements.txt
+
+paddlepaddle>=3.0.0,<4.0.0
+paddleocr>=3.0.0,<4.0.0

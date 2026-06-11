@@ -1,0 +1,283 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 180rpx;
+  box-sizing: border-box;
+  background: #101214;
+  color: #f5f7f9;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.section {
+  margin-bottom: 24rpx;
+  padding: 22rpx;
+  border: 1rpx solid #2a3036;
+  border-radius: 8rpx;
+  background: #171b20;
+}
+
+.section-title {
+  display: block;
+  margin-bottom: 18rpx;
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.input {
+  height: 76rpx;
+  margin-bottom: 16rpx;
+  padding: 0 18rpx;
+  border-radius: 8rpx;
+  background: #0f1215;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.small-btn {
+  margin: 0;
+  min-width: 144rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  border-radius: 8rpx;
+  background: #2b87ff;
+  color: #ffffff;
+  font-size: 26rpx;
+}
+
+.secondary-btn {
+  background: #2a3036;
+  color: #d8dee6;
+}
+
+.primary-btn {
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 8rpx;
+  background: #27c46b;
+  color: #07140c;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.task-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.task-label {
+  color: #8c98a4;
+}
+
+.task-value {
+  color: #ffffff;
+}
+
+.progress {
+  height: 14rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: #0f1215;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #27c46b;
+}
+
+.task-message {
+  display: block;
+  margin-top: 16rpx;
+  color: #c3cbd4;
+  font-size: 25rpx;
+  line-height: 1.5;
+}
+
+.retry-btn {
+  margin-top: 18rpx;
+}
+
+.empty {
+  color: #8c98a4;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.group-card {
+  margin-bottom: 18rpx;
+  padding: 18rpx;
+  border: 1rpx solid #2a3036;
+  border-radius: 8rpx;
+  background: #101419;
+}
+
+.group-card--selected {
+  border-color: #27c46b;
+  background: #14231a;
+}
+
+.group-card--processed {
+  background: #11161b;
+}
+
+.group-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.group-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.group-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.group-pending {
+  flex-shrink: 0;
+  color: #27c46b;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.group-done {
+  flex-shrink: 0;
+  color: #8c98a4;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 16rpx;
+}
+
+.status-pill {
+  padding: 6rpx 10rpx;
+  border-radius: 4rpx;
+  font-size: 21rpx;
+}
+
+.status-pending {
+  color: #f4d35e;
+  background: rgba(244, 211, 94, 0.14);
+}
+
+.status-processing {
+  color: #70b7ff;
+  background: rgba(112, 183, 255, 0.14);
+}
+
+.status-analyzed {
+  color: #27c46b;
+  background: rgba(39, 196, 107, 0.14);
+}
+
+.status-none {
+  color: #b7c0ca;
+  background: rgba(183, 192, 202, 0.14);
+}
+
+.status-failed {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.14);
+}
+
+.detail-toggle {
+  display: flex;
+  justify-content: center;
+  margin-top: 16rpx;
+  padding: 14rpx 0 2rpx;
+  color: #70b7ff;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.detail-toggle--muted {
+  color: #b7c0ca;
+}
+
+.video-section {
+  margin-top: 14rpx;
+}
+
+.video-section--processed {
+  margin-top: 18rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx solid #252b31;
+}
+
+.video-section-title {
+  display: block;
+  margin-bottom: 8rpx;
+  color: #f5f7f9;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.video-section-title--processed {
+  color: #8c98a4;
+}
+
+.video-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14rpx;
+  min-height: 58rpx;
+  border-top: 1rpx solid #252b31;
+}
+
+.video-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #d8dee6;
+  font-size: 24rpx;
+}
+
+.video-status {
+  flex-shrink: 0;
+  font-size: 23rpx;
+}
+
+.video-status-pending {
+  color: #f4d35e;
+}
+
+.video-status-processing {
+  color: #70b7ff;
+}
+
+.video-status-analyzed {
+  color: #27c46b;
+}
+
+.video-status-none,
+.video-status-waiting {
+  color: #b7c0ca;
+}
+
+.video-status-failed {
+  color: #ff6b6b;
+}

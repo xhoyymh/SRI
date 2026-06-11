@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111111" />
+    <title>短剧互动</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="videoDeck" class="video-deck hidden" aria-hidden="true">
+      <video id="videoSlot0" class="deck-video active" preload="metadata" playsinline webkit-playsinline></video>
+    </div>
+    <main id="app" class="app-shell"></main>
+    <nav id="tabs" class="tab-bar"></nav>
+    <div id="toast" class="toast" aria-live="polite"></div>
+    <script src="assets/danmaku/danmaku-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

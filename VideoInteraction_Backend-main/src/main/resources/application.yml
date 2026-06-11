@@ -1,0 +1,59 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: drama
+  profiles:
+    active: local
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/drama?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&connectionCollation=utf8mb4_unicode_ci}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 2048MB
+      max-request-size: 2048MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.example.drama.model.entity
+
+ai:
+  story:
+    client: mock
+
+admin:
+  token: ${ADMIN_TOKEN:dev-admin-token}
+
+cos:
+  bucket: short-drama-1308237976
+  region: ap-guangzhou
+  domain: https://short-drama-1308237976.cos.ap-guangzhou.myqcloud.com
+  secret-id: ${COS_SECRET_ID:}
+  secret-key: ${COS_SECRET_KEY:}
+  playback-proxy-base-url: ${COS_PLAYBACK_PROXY_BASE_URL:}
+  upload-expire-seconds: 3600
+  max-upload-bytes: 2147483648
+
+security:
+  secret-key: ${APP_SECRET_KEY:}
+
+rag:
+  base-url: ${RAG_BASE_URL:http://localhost:8091}
+  callback-base-url: ${BACKEND_CALLBACK_BASE_URL:http://localhost:8080/api/v1}
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn

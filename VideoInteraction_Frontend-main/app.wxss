@@ -1,0 +1,72 @@
+/* app.wxss - 全局样式 */
+page {
+  background-color: #111111;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 通用工具类 */
+.text-primary {
+  color: #ffc107;
+}
+
+.text-gray {
+  color: #999;
+}
+
+.text-white {
+  color: #fff;
+}
+
+.task-bars {
+  position: fixed;
+  left: 20rpx;
+  right: 20rpx;
+  bottom: 20rpx;
+  z-index: 999;
+}
+
+.task-bar {
+  margin-top: 12rpx;
+  padding: 14rpx 18rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.12);
+  border-radius: 8rpx;
+  background: rgba(18, 22, 27, 0.96);
+  box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.28);
+}
+
+.task-bar-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16rpx;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.task-bar-track {
+  height: 10rpx;
+  margin-top: 10rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.task-bar-fill {
+  height: 100%;
+  background: #27c46b;
+}
+
+.task-bar-rag .task-bar-fill {
+  background: #2b87ff;
+}
+
+.task-bar-message {
+  display: block;
+  margin-top: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #c3cbd4;
+  font-size: 22rpx;
+}

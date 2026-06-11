@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-change-me}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-drama}"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      # 首次启动自动导入当前 MVP 数据库快照（建表 + 当前数据）
+      - ./src/main/resources/sql/drama_current_dump.sql:/docker-entrypoint-initdb.d/01-drama-current-dump.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # 容器内连 mysql 服务名；账号口令沿用 application.yml
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/drama?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&connectionCollation=utf8mb4_unicode_ci"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "${MYSQL_ROOT_PASSWORD:-change-me}"
+      COS_SECRET_ID: "${COS_SECRET_ID:-}"
+      COS_SECRET_KEY: "${COS_SECRET_KEY:-}"
+      COS_PLAYBACK_PROXY_BASE_URL: ""

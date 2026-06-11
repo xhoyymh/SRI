@@ -1,0 +1,137 @@
+<view class="theater">
+  <view class="search-top">
+    <view class="back-btn" bindtap="onBackHome">‹</view>
+    <view class="search-box">
+      <view class="search-glyph">⌕</view>
+      <input
+        class="search-input"
+        placeholder="搜索短剧名"
+        value="{{keyword}}"
+        confirm-type="search"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
+      />
+    </view>
+    <view class="search-submit" bindtap="onSearchConfirm">搜索</view>
+  </view>
+
+  <scroll-view scroll-x class="quick-scroll" show-scrollbar="{{false}}">
+    <view class="quick-row">
+      <view class="quick-chip" data-type="identify" bindtap="onTapQuickAction">
+        <view class="quick-icon quick-icon--cyan">⌕</view>
+        <text>识剧</text>
+      </view>
+      <view class="quick-chip" data-type="rank" bindtap="onTapQuickAction">
+        <view class="quick-icon quick-icon--orange">●</view>
+        <text>榜单</text>
+      </view>
+      <view class="quick-chip" data-type="new" bindtap="onTapQuickAction">
+        <view class="quick-icon quick-icon--teal">▶</view>
+        <text>上新</text>
+      </view>
+      <view class="quick-chip" data-type="actor" bindtap="onTapQuickAction">
+        <view class="quick-icon quick-icon--gold">♟</view>
+        <text>演员</text>
+      </view>
+      <view class="quick-chip" data-type="category" bindtap="onTapQuickAction">
+        <view class="quick-icon quick-icon--purple">✣</view>
+        <text>分类</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <scroll-view wx:if="{{categories.length}}" scroll-x class="category-scroll" show-scrollbar="{{false}}">
+    <view class="category-row">
+      <view class="category {{selectedCategory === '' ? 'category--active' : ''}}" data-category="" bindtap="onTapCategory">全部</view>
+      <view
+        wx:for="{{categories}}"
+        wx:key="*this"
+        class="category {{selectedCategory === item ? 'category--active' : ''}}"
+        data-category="{{item}}"
+        bindtap="onTapCategory"
+      >{{item}}</view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <block wx:elif="{{keyword || selectedCategory}}">
+    <view class="section-head">
+      <text>搜索结果</text>
+    </view>
+    <view wx:if="{{filteredDramas.length}}" class="poster-grid">
+      <view
+        wx:for="{{filteredDramas}}"
+        wx:key="dramaId"
+        class="poster-card"
+        data-id="{{item.dramaId}}"
+        bindtap="onTapDrama"
+      >
+        <image wx:if="{{item.coverUrl}}" class="poster" src="{{item.coverUrl}}" mode="aspectFill" />
+        <view wx:else class="poster poster-placeholder">{{item.title}}</view>
+        <view class="poster-title">{{item.title}}</view>
+        <view class="poster-meta">{{item.tags[0] || '短剧'}} · 全{{item.episodeCount || 0}}集</view>
+      </view>
+    </view>
+    <view wx:else class="empty">{{emptyText}}</view>
+  </block>
+
+  <block wx:else>
+    <view class="section-head">
+      <text>搜索历史</text>
+      <text class="clear-history" bindtap="onClearHistory">⌫</text>
+    </view>
+    <view class="history-grid">
+      <view
+        wx:for="{{searchHistory}}"
+        wx:key="*this"
+        class="history-item"
+        data-keyword="{{item}}"
+        bindtap="onTapHistory"
+      >{{item}}</view>
+      <view wx:if="{{searchHistory.length === 0}}" class="history-item history-item--muted">暂无搜索历史</view>
+    </view>
+
+    <view class="section-head section-head--guess">
+      <text>猜你喜欢</text>
+      <text class="refresh" bindtap="onRefreshGuess">↻</text>
+    </view>
+    <view class="poster-grid">
+      <view
+        wx:for="{{guessDramas}}"
+        wx:key="dramaId"
+        class="poster-card"
+        data-id="{{item.dramaId}}"
+        bindtap="onTapDrama"
+      >
+        <image wx:if="{{item.coverUrl}}" class="poster" src="{{item.coverUrl}}" mode="aspectFill" />
+        <view wx:else class="poster poster-placeholder">{{item.title}}</view>
+        <view class="poster-hot">热 {{item.episodeCount || 0}}集</view>
+        <view class="poster-title">{{item.title}}</view>
+        <view class="poster-meta">{{item.tags[0] || '短剧'}} · 全{{item.episodeCount || 0}}集</view>
+      </view>
+    </view>
+
+    <view class="rank-panel">
+      <view class="rank-tabs">
+        <text class="rank-tab rank-tab--active">短剧热搜榜</text>
+        <text class="rank-tab">热点话题榜</text>
+      </view>
+      <view class="poster-grid">
+        <view
+          wx:for="{{rankedDramas}}"
+          wx:key="dramaId"
+          class="poster-card"
+          data-id="{{item.dramaId}}"
+          bindtap="onTapDrama"
+        >
+          <view class="rank-num">{{index + 1}}</view>
+          <image wx:if="{{item.coverUrl}}" class="poster" src="{{item.coverUrl}}" mode="aspectFill" />
+          <view wx:else class="poster poster-placeholder">{{item.title}}</view>
+          <view class="poster-title">{{item.title}}</view>
+          <view class="poster-meta">{{600 + index * 13}}万热搜值</view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

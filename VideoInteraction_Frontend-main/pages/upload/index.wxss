@@ -1,0 +1,329 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 24rpx 180rpx;
+  box-sizing: border-box;
+  background: #101214;
+  color: #f5f7f9;
+}
+
+.section {
+  margin-bottom: 24rpx;
+  padding: 22rpx;
+  border: 1rpx solid #2a3036;
+  border-radius: 8rpx;
+  background: #171b20;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.choose-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12rpx;
+}
+
+.section-title {
+  display: block;
+  margin-bottom: 18rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.input {
+  height: 76rpx;
+  margin-bottom: 16rpx;
+  padding: 0 18rpx;
+  border-radius: 8rpx;
+  background: #0f1215;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.cover-field {
+  display: flex;
+  gap: 18rpx;
+  align-items: stretch;
+  margin-top: 4rpx;
+}
+
+.cover-preview {
+  width: 160rpx;
+  height: 214rpx;
+  overflow: hidden;
+  border: 1rpx solid #303842;
+  border-radius: 8rpx;
+  background: #0f1215;
+}
+
+.cover-image,
+.cover-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+.cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8c98a4;
+}
+
+.cover-plus {
+  font-size: 58rpx;
+  line-height: 1;
+}
+
+.cover-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cover-title {
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.cover-desc {
+  margin-top: 12rpx;
+  color: #8c98a4;
+  font-size: 24rpx;
+  line-height: 1.45;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cover-actions {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+  margin-top: 18rpx;
+}
+
+.cover-btn {
+  min-width: 150rpx;
+}
+
+.small-btn {
+  margin: 0;
+  min-width: 164rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  border-radius: 8rpx;
+  background: #2b87ff;
+  color: #ffffff;
+  font-size: 26rpx;
+}
+
+.secondary-btn {
+  background: #2a3036;
+  color: #d8dee6;
+}
+
+.empty {
+  color: #8c98a4;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  min-height: 92rpx;
+  border-bottom: 1rpx solid #252b31;
+}
+
+.file-row:last-child {
+  border-bottom: 0;
+}
+
+.file-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 27rpx;
+}
+
+.file-status {
+  display: block;
+  margin-top: 8rpx;
+  color: #8c98a4;
+  font-size: 23rpx;
+}
+
+.episode-input {
+  width: 116rpx;
+  height: 64rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  background: #0f1215;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.icon-btn {
+  margin: 0;
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 52rpx;
+  padding: 0;
+  border-radius: 8rpx;
+  background: #2a3036;
+  color: #d8dee6;
+  font-size: 32rpx;
+}
+
+.actions {
+  display: flex;
+  gap: 16rpx;
+  margin: 30rpx 0;
+}
+
+.primary-btn {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 8rpx;
+  background: #27c46b;
+  color: #07140c;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.action-btn {
+  margin: 0;
+  width: 196rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+
+.task-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.task-label {
+  color: #8c98a4;
+}
+
+.task-value {
+  color: #ffffff;
+}
+
+.timing-section {
+  padding-bottom: 18rpx;
+}
+
+.duration-value {
+  color: #27c46b;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.compact-line {
+  margin-top: 16rpx;
+  margin-bottom: 10rpx;
+  font-size: 25rpx;
+}
+
+.flow-progress {
+  margin-bottom: 4rpx;
+}
+
+.progress {
+  height: 14rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: #0f1215;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #27c46b;
+}
+
+.task-message {
+  display: block;
+  margin-top: 16rpx;
+  color: #c3cbd4;
+  font-size: 25rpx;
+  line-height: 1.5;
+}
+
+.retry-btn {
+  margin-top: 18rpx;
+}
+
+.prompt-section {
+  border-color: rgba(39, 196, 107, 0.45);
+  background: #14231a;
+}
+
+.prompt-title {
+  margin-bottom: 8rpx;
+  color: #27c46b;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.prompt-text {
+  color: #c3cbd4;
+  font-size: 25rpx;
+  line-height: 1.5;
+}
+
+.job {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #252b31;
+}
+
+.job:last-child {
+  border-bottom: 0;
+}
+
+.job-files {
+  margin-top: 14rpx;
+}
+
+.job-file {
+  display: flex;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 10rpx 0;
+  color: #9aa4ae;
+  font-size: 23rpx;
+}
+
+.job-file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-file-status {
+  flex-shrink: 0;
+}

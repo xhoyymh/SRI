@@ -1,0 +1,105 @@
+<!-- pages/rag/index.wxml - RAG 调用页面 -->
+<view class="page">
+  <view class="topbar">
+    <button class="small-btn secondary-btn" bindtap="onGoHome">首页</button>
+    <button class="small-btn" loading="{{loading}}" bindtap="refresh">刷新</button>
+  </view>
+
+  <view wx:if="{{ragState.taskId}}" class="section">
+    <text class="section-title">当前 RAG 任务</text>
+    <view class="task-line">
+      <text class="task-label">状态</text>
+      <text class="task-value">{{ragState.status}} / {{ragState.stage}}</text>
+    </view>
+    <view class="task-line">
+      <text class="task-label">进度</text>
+      <text class="task-value">{{ragState.progress}}%</text>
+    </view>
+    <view class="progress">
+      <view class="progress-fill" style="width: {{ragState.progress || 0}}%;"></view>
+    </view>
+    <text class="task-message">{{ragState.message || ragState.errorMessage}}</text>
+    <button wx:if="{{ragState.status === 'FAILED'}}" class="small-btn retry-btn" loading="{{starting}}" bindtap="retryTask">重试</button>
+  </view>
+
+  <view class="section">
+    <text class="section-title">模型配置</text>
+    <input class="input" placeholder="模型A（互动点判断模型）apiKey" password value="{{judgeApiKey}}" bindinput="onJudgeKeyInput" />
+    <input class="input" placeholder="模型A（互动点判断模型）endpointId / ep" value="{{judgeEndpointId}}" bindinput="onJudgeEndpointInput" />
+    <input class="input" placeholder="模型B apiKey（可选，不填只加高光弹幕）" password value="{{generationApiKey}}" bindinput="onGenerationKeyInput" />
+    <button class="primary-btn" loading="{{starting}}" disabled="{{starting || ragState.active || !hasPendingGroups}}" bindtap="startRag">开始处理选中待处理视频</button>
+  </view>
+
+  <view class="section">
+    <text class="section-title">待处理视频</text>
+    <view wx:if="{{loading}}" class="empty">加载中...</view>
+    <view wx:elif="{{pendingGroups.length === 0}}" class="empty">暂无待处理视频</view>
+    <view
+      wx:for="{{pendingGroups}}"
+      wx:key="batchId"
+      class="group-card {{item.batchId === selectedBatchId ? 'group-card--selected' : ''}}"
+      data-batch-id="{{item.batchId}}"
+      bindtap="onSelectGroup"
+    >
+      <view class="group-head">
+        <view class="group-main">
+          <text class="group-title">{{item.dramaTitle || '未命名短剧'}}</text>
+        </view>
+        <text class="group-pending">{{item.unprocessedCount}} 待处理</text>
+      </view>
+      <view class="status-row">
+        <text class="status-pill status-pending">待处理 {{item.pendingCount}}</text>
+        <text class="status-pill status-processing">处理中 {{item.processingCount}}</text>
+        <text class="status-pill status-analyzed">已生成 {{item.analyzedCount}}</text>
+        <text class="status-pill status-none">无互动 {{item.noInteractionCount}}</text>
+        <text wx:if="{{item.failedCount}}" class="status-pill status-failed">失败 {{item.failedCount}}</text>
+      </view>
+      <view wx:if="{{item.unprocessedVideos.length}}" class="detail-toggle" data-key="{{item.detailKey}}" catchtap="toggleGroupDetails">
+        <text>{{item.detailExpanded ? '收起未处理视频' : '展开未处理视频'}}</text>
+      </view>
+      <view wx:if="{{item.detailExpanded}}" class="video-section">
+        <text class="video-section-title">未处理视频</text>
+        <view class="video-list">
+          <view wx:for="{{item.unprocessedVideos}}" wx:key="assetId" wx:for-item="video" class="video-row">
+            <text class="video-name">第 {{video.episodeNo}} 集 · {{video.originalFileName}}</text>
+            <text class="video-status video-status-{{video.statusClass}}">{{video.statusLabel}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">已处理视频</text>
+    <view wx:if="{{loading}}" class="empty">加载中...</view>
+    <view wx:elif="{{processedGroups.length === 0}}" class="empty">暂无已处理视频</view>
+    <view
+      wx:for="{{processedGroups}}"
+      wx:key="batchId"
+      class="group-card group-card--processed"
+    >
+      <view class="group-head">
+        <view class="group-main">
+          <text class="group-title">{{item.dramaTitle || '未命名短剧'}}</text>
+        </view>
+        <text class="group-done">{{item.processedCount}} 已处理</text>
+      </view>
+      <view class="status-row">
+        <text class="status-pill status-analyzed">已生成 {{item.analyzedCount}}</text>
+        <text class="status-pill status-none">无互动 {{item.noInteractionCount}}</text>
+      </view>
+      <view class="detail-toggle detail-toggle--muted" data-key="{{item.detailKey}}" catchtap="toggleGroupDetails">
+        <text>{{item.detailExpanded ? '收起已处理视频' : '展开已处理视频'}}</text>
+      </view>
+      <view wx:if="{{item.detailExpanded}}" class="video-section video-section--processed">
+        <text class="video-section-title video-section-title--processed">已处理视频</text>
+        <view class="video-list">
+          <view wx:for="{{item.processedVideos}}" wx:key="assetId" wx:for-item="video" class="video-row">
+            <text class="video-name">第 {{video.episodeNo}} 集 · {{video.originalFileName}}</text>
+            <text class="video-status video-status-{{video.statusClass}}">{{video.statusLabel}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

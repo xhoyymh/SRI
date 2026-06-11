@@ -1,0 +1,38 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/index/index",
+    "pages/mine/index",
+    "pages/upload/index",
+    "pages/rag/index",
+    "pages/play/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "短剧互动",
+    "navigationBarBackgroundColor": "#111111",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#111111"
+  },
+  "usingComponents": {},
+  "tabBar": {
+    "custom": true,
+    "color": "#9aa3ad",
+    "selectedColor": "#ffd54a",
+    "backgroundColor": "#101214",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/index/index",
+        "text": "剧场"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  }
+}
