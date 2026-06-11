@@ -106,7 +106,7 @@
     </cover-view>
 
     <cover-view
-      wx:if="{{!commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !actionLockActive && !story.show}}"
+      wx:if="{{!commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && (!story.show || story.contentType === 'VIDEO')}}"
       wx:for="{{danmakuTexts}}"
       wx:key="id"
       class="danmaku-text {{item.move ? 'danmaku-text--move' : ''}} {{item.kind === 'stat' || item.kind === 'highlight' ? 'danmaku-text--stat' : ''}} {{item.kind === 'user' ? 'danmaku-text--user' : ''}}"
@@ -135,9 +135,9 @@
       </cover-view>
     </cover-view>
 
-    <cover-view wx:if="{{dramaMeta.title && !actionLockActive && !commentPanel.show && !dramaCommentPanel.show && !branch.show && !blackout.show && !action.show && !actionPrompt.show && !actionSpeedBoost.show && !story.show}}" class="play-drama-info {{taskBars.length ? 'play-drama-info--with-task-bars' : ''}} {{taskBars.length > 1 ? 'play-drama-info--with-many-task-bars' : ''}}">
+    <cover-view wx:if="{{(dramaMeta.title || title) && !episodePanel && !commentPanel.show && !dramaCommentPanel.show && !blackout.show && (!story.show || story.contentType === 'VIDEO')}}" class="play-drama-info {{taskBars.length ? 'play-drama-info--with-task-bars' : ''}} {{taskBars.length > 1 ? 'play-drama-info--with-many-task-bars' : ''}}">
       <cover-view class="danmaku-send-btn" catchtap="openDanmakuInput">弹/</cover-view>
-      <cover-view class="play-drama-name">{{dramaMeta.title}}</cover-view>
+      <cover-view class="play-drama-name">{{dramaMeta.title || title}}</cover-view>
     </cover-view>
 
     <!-- 选集入口：底部，位于进度条之上不遮挡 -->

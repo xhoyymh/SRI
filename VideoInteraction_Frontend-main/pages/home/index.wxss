@@ -46,7 +46,7 @@
 }
 
 .home-video-overlay--native .social-actions {
-  bottom: 58rpx;
+  bottom: 72rpx;
 }
 
 .home-video-overlay--native .drama-info {
@@ -245,53 +245,62 @@
 .social-actions {
   position: absolute;
   right: 22rpx;
-  bottom: 238rpx;
+  bottom: 252rpx;
+  bottom: calc(252rpx + constant(safe-area-inset-bottom));
+  bottom: calc(252rpx + env(safe-area-inset-bottom));
   z-index: 18;
   display: flex;
   flex-direction: column;
-  gap: 44rpx;
+  gap: 22rpx;
   align-items: center;
 }
 
 .social-btn {
-  width: 76rpx;
+  width: 64rpx;
+  height: 76rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   text-align: center;
   color: #fff;
 }
 
 .social-icon {
-  width: 70rpx;
-  height: 66rpx;
-  line-height: 66rpx;
-  margin: 0 auto 2rpx;
+  width: 60rpx;
+  height: 50rpx;
+  line-height: 50rpx;
+  margin: 0 auto;
   border-radius: 0;
   background: transparent;
   border: none;
   color: #fff;
-  font-size: 58rpx;
+  font-size: 46rpx;
   font-weight: 900;
   text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.72);
   box-shadow: none;
 }
 
 .social-icon-comment {
-  width: 52rpx;
-  height: 48rpx;
-  line-height: 38rpx;
+  width: 46rpx;
+  height: 46rpx;
+  line-height: 36rpx;
+  margin-top: 2rpx;
+  margin-bottom: 2rpx;
   border-radius: 50%;
   background: #fff;
   color: #101010;
-  font-size: 26rpx;
+  font-size: 22rpx;
   letter-spacing: 1rpx;
   text-shadow: none;
 }
 
 .social-icon-star {
-  font-size: 62rpx;
+  font-size: 50rpx;
 }
 
 .social-icon-heart {
-  font-size: 64rpx;
+  font-size: 52rpx;
   color: #fff;
   font-family: Arial, sans-serif;
 }
@@ -311,7 +320,8 @@
 }
 
 .social-text {
-  font-size: 22rpx;
+  font-size: 20rpx;
+  line-height: 24rpx;
   font-weight: 800;
   text-shadow: 0 3rpx 9rpx rgba(0, 0, 0, 0.72);
 }

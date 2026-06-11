@@ -76,7 +76,7 @@
 }
 
 .play-video-overlay--native .drama-social-actions {
-  bottom: 58rpx;
+  bottom: 138rpx;
 }
 
 .play-video-overlay--native .overlay {
@@ -421,7 +421,7 @@
   bottom: 148rpx;
   bottom: calc(148rpx + constant(safe-area-inset-bottom));
   bottom: calc(148rpx + env(safe-area-inset-bottom));
-  z-index: 73;
+  z-index: 126;
   min-height: 108rpx;
   display: flex;
   flex-direction: column;

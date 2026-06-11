@@ -165,6 +165,7 @@ Page({
   speedPressTimer: null,
   suppressTapUntil: 0,
   manualPaused: false,
+  homeResumeOnShow: false,
   danmakuLaneAvailableAt: [],
   optionMeta: {},
   shownMap: {},
@@ -215,6 +216,7 @@ Page({
   onShow() {
     this.syncTabBar(0)
     this.refreshSocial()
+    this.resumeHomeVideoAfterNavigation()
   },
 
   onHide() {
@@ -686,6 +688,7 @@ Page({
     this.wasPlayingBeforeSpeed = false
     this.suppressTapUntil = 0
     this.manualPaused = false
+    this.homeResumeOnShow = false
     this.forceReloadedPaused = false
     this.originalUrl = ''
     this.resumeAt = 0
@@ -789,7 +792,7 @@ Page({
   },
 
   pauseHomeVideoForNavigation() {
-    this.manualPaused = true
+    this.homeResumeOnShow = !!(this.homeResumeOnShow || (!this.manualPaused && this.data.videoUrl && (this.data.playing || this.data.videoAutoplay)))
     this.pauseVideo()
     const drama = this.data.currentDrama
     const episode = this.data.currentEpisode
@@ -807,6 +810,22 @@ Page({
       speedLocked: false,
       speedLockText: '',
       speedMenu: false
+    })
+  },
+
+  resumeHomeVideoAfterNavigation() {
+    if (!this.homeResumeOnShow || !this.data.videoUrl) return
+    this.homeResumeOnShow = false
+    this.manualPaused = false
+    this.setData({
+      videoAutoplay: true,
+      playing: true
+    }, () => {
+      this.refreshVideoContext()
+      if (this.curTime > 0) this.seekVideo(this.curTime, true)
+      this.playVideo()
+      setTimeout(() => this.playVideo(), 180)
+      setTimeout(() => this.playVideo(), 520)
     })
   },
 

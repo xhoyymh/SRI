@@ -1,5 +1,5 @@
 // Shared frontend runtime config.
-// APK demo uses the public backend IP so real devices can reach the API.
+// Server deployment used by real-device preview and release builds.
 const BASE_URL = 'http://106.55.249.9:8080/api/v1'
 
 const USE_MOCK = false

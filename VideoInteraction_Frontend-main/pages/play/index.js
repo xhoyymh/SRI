@@ -209,7 +209,7 @@ Page({
       sessionKey: ''
     },
     floats: [], // 飘屏元素（点击爆发的表情）
-    danmakuTexts: [], // CSV 弹幕和高光统计弹幕
+    danmakuTexts: [], // 弹幕浮层
     bigImage: { show: false, src: '', beat: false }, // 右下角大图（一动一动）
     playing: false, // 播放状态（自绘控制用）
     progressPercent: 0, // 进度条百分比
@@ -718,6 +718,7 @@ Page({
       const dramaId = episode.dramaId || this.data.dramaId
       this.resetPlaybackMetrics(videoUrl)
       this.prepareEpisodeDanmakuCache((this.data.dramaMeta && this.data.dramaMeta.title) || episode.dramaTitle || episode.title, currentEpisodeNo)
+      this.loadRemoteDanmaku(episodeId)
       this.forceReloadedPaused = false
       this.setData({
         videoUrl,
@@ -731,7 +732,6 @@ Page({
         this.syncEpisodeRangeForCurrent()
         setTimeout(() => this.playIfAllowed(), 80)
       })
-      this.loadRemoteDanmaku(episodeId)
       userStore.getDramaSocial(dramaId)
         .then((dramaSocial) => this.setData({ dramaSocial }))
         .catch((err) => console.warn('加载短剧社交数据失败', err))
@@ -824,6 +824,7 @@ Page({
     const detail = e.detail || {}
     console.error('video error', detail, this.data.videoUrl)
     if (this.inMandatoryActionVideo) {
+      this.clearDanmakuScope(this.currentGeneratedDanmakuScope())
       this.mandatoryActionPauseReason = ''
       this.pendingSeek = this.resumeAt
       this.resetPlaybackMetrics(this.originalUrl)
@@ -881,6 +882,7 @@ Page({
         this.setData({ playing: true })
       }
       if (this.inMandatoryActionVideo) {
+        this.clearDanmakuScope(this.currentGeneratedDanmakuScope())
         this.inMandatoryActionVideo = false
         this.mandatoryActionPauseReason = ''
         this.setData({
@@ -975,7 +977,9 @@ Page({
       }
     }
     this.saveCurrentProgress(cur)
-    if (!this.inBranchVideo) this.checkDanmaku(cur)
+    if (!this.isGeneratedVideoDanmakuContext()) {
+      this.checkDanmaku(cur)
+    }
     if (this.inMandatoryActionVideo) {
       this.checkActionPrompt(cur)
       this.checkActionSpeedBoost(cur)
@@ -1017,7 +1021,9 @@ Page({
       }
     }
     this.saveCurrentProgress(cur)
-    if (!this.inBranchVideo) this.checkDanmaku(cur)
+    if (!this.isGeneratedVideoDanmakuContext()) {
+      this.checkDanmaku(cur)
+    }
     if (this.inMandatoryActionVideo) {
       this.checkActionPrompt(cur)
       this.checkActionSpeedBoost(cur)
@@ -1033,6 +1039,7 @@ Page({
       this.playNextEpisodeOrFinish()
       return
     }
+    this.clearDanmakuScope(this.currentGeneratedDanmakuScope())
     this.inBranchVideo = false
     if (this.selectedIsCorrect === false) {
       // 错误分支：置灰该选项 → 进入黑屏失败序列
@@ -1063,6 +1070,7 @@ Page({
 
   // 点「重新选择」：回到分支点重新弹出分支（错误项已置灰）
   onRetryBranch() {
+    this.clearDanmakuScope(this.currentGeneratedDanmakuScope())
     this.inBranchVideo = false
     this.pendingSeek = this.branchStartTime
     this.pendingReopenBranch = true
@@ -1481,6 +1489,7 @@ Page({
       this.setData({ playing: true })
       return
     }
+    this.setData({ danmakuTexts: [] })
     wx.showLoading({ title: '加载中...', mask: true })
     try {
       let story
@@ -1533,6 +1542,7 @@ Page({
         videoAutoplay: true,
         playing: true,
         progressPercent: 0,
+        danmakuTexts: [],
         story: base
       }, () => {
         this.refreshVideoContext()
@@ -1687,7 +1697,8 @@ Page({
       actionLockActive: true,
       actionVideoActive: true,
       actionPrompt: createActionPromptState(),
-      actionSpeedBoost: createActionSpeedBoostState()
+      actionSpeedBoost: createActionSpeedBoostState(),
+      danmakuTexts: []
     })
     wx.showLoading({ title: '加载中...', mask: true })
     try {
@@ -2320,7 +2331,6 @@ Page({
   },
 
   openDanmakuInput() {
-    if (this.isActionLocked()) return
     if (!authStore.requireLogin('登录后可以发送弹幕')) return
     wx.showModal({
       title: '发弹幕',
@@ -2337,20 +2347,46 @@ Page({
   },
 
   async sendUserDanmaku(text) {
-    this.spawnDanmakuText(text, { kind: 'user', force: true })
+    const scope = this.currentDanmakuScope()
+    this.spawnDanmakuText(text, { kind: 'user', force: true, scope })
+    if (this.isGeneratedVideoDanmakuContext()) return
     const episodeId = this.data.episodeId
     if (!episodeId) return
     try {
-      const item = await danmakuApi.postDanmaku(episodeId, {
+      await danmakuApi.postDanmaku(episodeId, {
         dramaId: this.data.dramaId,
         currentTime: this.curTime || 0,
         content: text,
         clientDanmakuId: `${Date.now()}_${Math.random().toString(16).slice(2)}`
       })
-      this.addRemoteDanmaku(item)
     } catch (e) {
       console.error('发送弹幕失败', e)
       wx.showToast({ title: '弹幕保存失败', icon: 'none' })
+    }
+  },
+
+  isGeneratedVideoDanmakuContext() {
+    return !!(this.inBranchVideo || this.inMandatoryActionVideo || (this.data.story && this.data.story.show && this.data.story.contentType === 'VIDEO'))
+  },
+
+  currentGeneratedDanmakuScope() {
+    const story = this.data.story || {}
+    const action = this.data.action || {}
+    const id = story.generationId || action.generationId || (this.currentBranch && this.currentBranch.highlightId) || 'active'
+    return `generated:${id}`
+  },
+
+  currentDanmakuScope() {
+    if (this.isGeneratedVideoDanmakuContext()) return this.currentGeneratedDanmakuScope()
+    return `episode:${this.data.episodeId || ''}`
+  },
+
+  clearDanmakuScope(scope) {
+    if (!scope) return
+    const texts = this.data.danmakuTexts || []
+    const next = texts.filter((item) => item.scope !== scope)
+    if (next.length !== texts.length) {
+      this.setData({ danmakuTexts: next })
     }
   },
 
@@ -2375,6 +2411,7 @@ Page({
   },
 
   checkDanmaku(cur) {
+    if (this.isGeneratedVideoDanmakuContext()) return
     const episodeNo = Number(this.data.currentEpisodeNo) || 0
     if (!episodeNo) return
     const sec = Math.max(0, Math.floor(Number(cur) || 0))
@@ -2394,16 +2431,19 @@ Page({
   spawnDanmakuText(text, options = {}) {
     const content = String(text || '').trim()
     if (!content) return
+    const kind = options.kind || 'normal'
     const id = `${Date.now()}_${Math.floor(Math.random() * 100000)}`
     const requestedLane = Number.isFinite(Number(options.lane)) ? Number(options.lane) : Math.floor(Math.random() * DANMAKU_LANE_COUNT)
     const item = {
       id,
       text: content,
       top: options.top != null ? Number(options.top) : DANMAKU_BAND_TOP,
-      kind: options.kind || 'normal',
+      kind,
+      scope: options.scope || 'system',
       move: false
     }
     const add = () => {
+      if (kind !== 'user' && this.isGeneratedVideoDanmakuContext()) return
       const activeTexts = this.data.danmakuTexts || []
       if (item.kind === 'normal' || item.kind === 'user') {
         const lane = this.reserveDanmakuLane(requestedLane, !!options.force)
