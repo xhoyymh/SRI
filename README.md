@@ -305,18 +305,6 @@ COS_SECRET_KEY=
 sdk.dir=<ANDROID_SDK_PATH>
 ```
 
-### 不想上传真实密钥
-
-不要提交这些文件：
-
-```text
-.env
-application-local.yml
-src/main/resources/application-local.yml
-local.properties
-```
-
-仓库 `.gitignore` 已默认忽略它们。
 
 ## 8. 安全说明
 
