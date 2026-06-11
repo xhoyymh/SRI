@@ -8,12 +8,16 @@ Thumbs.db
 node_modules/
 project.private.config.json
 utils/local-secrets.js
+CLAUDE*.md
+typings/
+miniapp/*/i18nInfo.json
 
 # Python
 .venv/
 __pycache__/
 *.pyc
 .env
+debug-task.json
 
 # Java / Android / Gradle
 target/
@@ -40,8 +44,9 @@ local.properties
 data/runtime/
 data/work*/
 data/raw_videos*/
+*danmaku-data.generated.js
+local-danmaku.full.json
 
 # Local backend profiles and secrets
 application-local.yml
 src/main/resources/application-local.yml
-

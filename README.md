@@ -2,7 +2,7 @@
 
 SRI 是一个面向短剧场景的 AI 全栈互动项目。它把短剧从普通播放升级为“剧情时间线上的即时互动”：用户在爽点、反转点、名场面、分支点或动作点出现时，可以点击情绪按钮、发送弹幕、选择剧情分支、触发动作互动，并查看 AI 生成的分支/动作内容。
 
-仓库是脱敏源码包，不包含真实 API Key、本机 SDK 路径、`.env`、`application-local.yml`、`local.properties`、依赖目录、虚拟环境、构建产物、日志、大视频文件和运行时数据库。
+仓库是脱敏源码包，不包含真实 API Key、本机 SDK 路径、`.env`、`application-local.yml`、`local.properties`、依赖目录、虚拟环境、构建产物、日志、大视频文件、运行时数据库、大体积生成弹幕样本、工具生成缓存和内部协作提示文件。
 
 ## 项目结构
 
@@ -11,8 +11,7 @@ SRI 是一个面向短剧场景的 AI 全栈互动项目。它把短剧从普通
 ├── VideoInteraction_Frontend-main   # 原生微信小程序端
 ├── VideoInteraction_Android-main    # Android WebView APK 端
 ├── VideoInteraction_Backend-main    # Spring Boot 后端服务
-├── Videointeraciton_RAG             # Python AI/RAG 短剧分析服务
-└── 封面                              # 演示短剧封面素材
+└── Videointeraciton_RAG             # Python AI/RAG 短剧分析服务
 ```
 
 ## 功能概览
@@ -23,6 +22,8 @@ SRI 是一个面向短剧场景的 AI 全栈互动项目。它把短剧从普通
 - 上传工作台：小程序 COS 直传、Android multipart 上传、封面选择、上传批次、视频资产表、完成回调。
 - RAG 分析：上传视频后启动 RAG 任务，抽帧/ASR/OCR/多模态理解，生成高光弹幕、分支选择和动作互动配置。
 - 双端适配：同一后端和 AI 链路支持微信小程序端与 Android WebView APK 端。
+
+说明：公开仓库只保留轻量演示弹幕和必要占位文件。完整生成弹幕、运行时缓存、上传视频和云端素材请按实际环境重新导入，不建议直接提交到 Git。
 
 ## 环境要求
 
@@ -326,4 +327,3 @@ local.properties
 1. 在对应云平台撤销/轮换 key。
 2. 从 Git 历史中清理敏感提交。
 3. 重新推送清理后的历史。
-
